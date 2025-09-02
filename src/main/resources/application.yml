@@ -1,3 +1,13 @@
 spring:
   application:
     name: rmi-ai
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: ${RMI_AI_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
