@@ -12,6 +12,7 @@ import java.util.List;
 public class Container {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
