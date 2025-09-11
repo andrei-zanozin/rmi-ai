@@ -12,6 +12,7 @@ import java.util.List;
 public class ContainerRawMaterial {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

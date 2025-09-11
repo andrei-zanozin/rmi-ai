@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class ContainerOperatingWeight {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

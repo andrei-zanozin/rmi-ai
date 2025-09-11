@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 public class Kpi {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
