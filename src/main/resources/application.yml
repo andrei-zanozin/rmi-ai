@@ -15,4 +15,10 @@ spring:
     ollama:
       chat:
         options:
-          model: "gemma3:1b"
+          model: "mistral:7b"
+
+logging:
+  level:
+    io:
+      zanozin:
+        rmi_ai: DEBUG
