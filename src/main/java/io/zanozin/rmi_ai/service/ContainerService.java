@@ -3,6 +3,7 @@ package io.zanozin.rmi_ai.service;
 import io.zanozin.rmi_ai.domain.entity.BaseVolume;
 import io.zanozin.rmi_ai.domain.entity.Container;
 import io.zanozin.rmi_ai.repository.BaseVolumeRepository;
+import io.zanozin.rmi_ai.repository.ContainerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class ContainerService {
 
     private final BaseVolumeRepository baseVolumeRepository;
+
+    private final ContainerRepository containerRepository;
 
     @Tool(description = "Find container names by base volume parameters")
     @Transactional
@@ -51,5 +55,29 @@ public class ContainerService {
         log.debug("Found container names: {}", containerNames);
 
         return containerNames;
+    }
+
+    @Tool(description = "Create a new empty container with the specified name")
+    @Transactional
+    public void createContainer(@ToolParam(description = "Value for the specified name") String name) {
+        if (containerRepository.existsByName(name)) {
+            throw new ContainerException("Container with name '%s' already exists".formatted(name));
+        }
+
+        Container c = new Container();
+        c.setName(name);
+        containerRepository.save(c);
+    }
+
+    @Tool(description = "Delete a container by the specified name")
+    @Transactional
+    public void deleteContainer(@ToolParam(description = "Value for the specified name") String name) {
+        Optional<Container> cOpt = containerRepository.findByName(name);
+
+        if (cOpt.isEmpty()) {
+            throw new ContainerException("Container with name '%s' does not exist".formatted(name));
+        } else {
+            containerRepository.delete(cOpt.get());
+        }
     }
 }
