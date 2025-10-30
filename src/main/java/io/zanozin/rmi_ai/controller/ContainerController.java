@@ -31,11 +31,21 @@ public class ContainerController {
     public void createContainer(@RequestBody ContainerDto cDto) {
         Container c = new Container();
         c.setName(cDto.getName());
-        c.setBaseVolumes(baseVolumeRepository.findAllById(cDto.getBaseVolumeIds()));
-        List<ContainerRawMaterial> crmList = cDto.getRawMaterials().stream()
-                .map(crmDto -> buildContainerRawMaterial(c, crmDto))
-                .toList();
-        c.setRawMaterials(crmList);
+
+        // Save base volumes.
+        if (cDto.getBaseVolumeIds() != null && !cDto.getBaseVolumeIds().isEmpty()) {
+            List<BaseVolume> bvList = baseVolumeRepository.findAllById(cDto.getBaseVolumeIds());
+            bvList.forEach(bv -> bv.setContainer(c));
+            c.setBaseVolumes(bvList);
+        }
+
+        // Save container raw materials.
+        if (cDto.getRawMaterials() != null && !cDto.getRawMaterials().isEmpty()) {
+            List<ContainerRawMaterial> crmList = cDto.getRawMaterials().stream()
+                    .map(crmDto -> buildContainerRawMaterial(c, crmDto))
+                    .toList();
+            c.setRawMaterials(crmList);
+        }
 
         containerRepository.save(c);
     }
