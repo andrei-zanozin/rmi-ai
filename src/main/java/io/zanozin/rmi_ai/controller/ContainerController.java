@@ -1,18 +1,17 @@
 package io.zanozin.rmi_ai.controller;
 
-import io.zanozin.rmi_ai.domain.dto.ContainerOperatingWeightDto;
-import io.zanozin.rmi_ai.domain.dto.ContainerRawMaterialDto;
-import io.zanozin.rmi_ai.domain.dto.KpiDto;
+import io.zanozin.rmi_ai.domain.Mapper;
+import io.zanozin.rmi_ai.domain.dto.*;
 import io.zanozin.rmi_ai.domain.entity.*;
 import io.zanozin.rmi_ai.repository.BaseVolumeRepository;
 import io.zanozin.rmi_ai.repository.ContainerRepository;
-import io.zanozin.rmi_ai.domain.dto.ContainerDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
@@ -33,8 +32,11 @@ public class ContainerController {
         c.setName(cDto.getName());
 
         // Save base volumes.
-        if (cDto.getBaseVolumeIds() != null && !cDto.getBaseVolumeIds().isEmpty()) {
-            List<BaseVolume> bvList = baseVolumeRepository.findAllById(cDto.getBaseVolumeIds());
+        if (cDto.getBaseVolumes() != null && !cDto.getBaseVolumes().isEmpty()) {
+            Set<Long> bvIdSet = cDto.getBaseVolumes().stream()
+                    .map(BaseVolumeDto::getId)
+                    .collect(Collectors.toSet());
+            List<BaseVolume> bvList = baseVolumeRepository.findAllById(bvIdSet);
             bvList.forEach(bv -> bv.setContainer(c));
             c.setBaseVolumes(bvList);
         }
@@ -57,9 +59,9 @@ public class ContainerController {
         ContainerDto cDto = new ContainerDto();
         cDto.setId(c.getId());
         cDto.setName(c.getName());
-        cDto.setBaseVolumeIds(c.getBaseVolumes().stream()
-                .map(BaseVolume::getId)
-                .collect(Collectors.toSet()));
+        cDto.setBaseVolumes(c.getBaseVolumes().stream()
+                .map(Mapper::map)
+                .toList());
         List<ContainerRawMaterialDto> crmDtoList = c.getRawMaterials().stream()
                 .map(crm -> {
                     ContainerRawMaterialDto crmDto = new ContainerRawMaterialDto();

@@ -1,5 +1,8 @@
 package io.zanozin.rmi_ai.service;
 
+import io.zanozin.rmi_ai.domain.Mapper;
+import io.zanozin.rmi_ai.domain.dto.BaseVolumeDto;
+import io.zanozin.rmi_ai.domain.dto.ContainerDto;
 import io.zanozin.rmi_ai.domain.entity.BaseVolume;
 import io.zanozin.rmi_ai.domain.entity.Container;
 import io.zanozin.rmi_ai.repository.BaseVolumeRepository;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -78,6 +82,46 @@ public class ContainerService {
             throw new ContainerException("Container with name '%s' does not exist".formatted(name));
         } else {
             containerRepository.delete(cOpt.get());
+        }
+    }
+
+    @Tool(description = "Find container 'id' by 'name'")
+    public Long findContainerIdByName(@ToolParam(description = "Value of container 'name'") String name) {
+        log.debug("Finding container id by name: {}", name);
+        Optional<Container> cOpt = containerRepository.findByName(name);
+
+        if (cOpt.isEmpty()) {
+            throw new ContainerException("Container with name '%s' does not exist".formatted(name));
+        } else {
+            Container c = cOpt.get();
+            log.debug("Found container id: {}", c.getId());
+
+            return c.getId();
+        }
+    }
+
+    @Tool(description = "Retrieve a container by 'id'")
+    @Transactional
+    public ContainerDto findContainerById(@ToolParam(description = "Value of container 'id'") Long id) {
+        log.debug("Retrieving container by id: {}", id);
+        Optional<Container> cOpt = containerRepository.findById(id);
+
+        if (cOpt.isEmpty()) {
+            throw new ContainerException("Container with id '%s' does not exist".formatted(id));
+        } else {
+            Container c = cOpt.get();
+            ContainerDto cDto = Mapper.map(c);
+
+            if (c.getBaseVolumes() != null && !c.getBaseVolumes().isEmpty()) {
+                List<BaseVolumeDto> bvDtoList = c.getBaseVolumes().stream()
+                        .map(Mapper::map)
+                        .toList();
+                cDto.setBaseVolumes(bvDtoList);
+            }
+
+            log.debug("Retrieved container DTO: {}", cDto);
+
+            return cDto;
         }
     }
 }
