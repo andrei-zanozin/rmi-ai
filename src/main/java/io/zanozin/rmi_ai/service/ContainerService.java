@@ -13,9 +13,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,5 +95,36 @@ public class ContainerService {
 
             return cDto;
         }
+    }
+
+    @Tool(description = "Add base volumes to a container")
+    @Transactional
+    public void addBaseVolumeToContainer(
+            @ToolParam(description = "Value of container 'id'") Long containerId,
+            @ToolParam(description = "Values of base volume 'id'") Set<Long> baseVolumeIds
+    ) {
+        log.debug("Adding base volumes {} to container {}", baseVolumeIds, containerId);
+        Container c = containerRepository.findById(containerId)
+                .orElseThrow(() -> new ContainerException("Container with id '%s' does not exist"
+                        .formatted(containerId)));
+        baseVolumeRepository.findAllById(baseVolumeIds).forEach(bv -> bv.setContainer(c));
+        log.debug("Added base volumes {} to container {}", baseVolumeIds, containerId);
+    }
+
+    @Tool(description = "Remove base volumes from a container")
+    @Transactional
+    public void removeBaseVolumeFromContainer(
+            @ToolParam(description = "Value of container 'id'") Long containerId,
+            @ToolParam(description = "Values of base volume 'id'") Set<Long> baseVolumeIds
+    ) {
+        log.debug("Removing base volumes {} from container {}", baseVolumeIds, containerId);
+        Set<Long> removedBaseVolumeIds = new HashSet<>();
+        baseVolumeRepository.findAllById(baseVolumeIds).forEach(bv -> {
+            if (bv.getContainer() != null && bv.getContainer().getId().equals(containerId)) {
+                bv.setContainer(null);
+                removedBaseVolumeIds.add(bv.getId());
+            }
+        });
+        log.debug("Removed base volumes {} from container {}", removedBaseVolumeIds, containerId);
     }
 }
