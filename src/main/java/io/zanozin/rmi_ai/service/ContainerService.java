@@ -1,7 +1,6 @@
 package io.zanozin.rmi_ai.service;
 
 import io.zanozin.rmi_ai.domain.Mapper;
-import io.zanozin.rmi_ai.domain.dto.BaseVolumeDto;
 import io.zanozin.rmi_ai.domain.dto.ContainerDto;
 import io.zanozin.rmi_ai.domain.entity.BaseVolume;
 import io.zanozin.rmi_ai.domain.entity.Container;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -110,15 +108,7 @@ public class ContainerService {
             throw new ContainerException("Container with id '%s' does not exist".formatted(id));
         } else {
             Container c = cOpt.get();
-            ContainerDto cDto = Mapper.map(c);
-
-            if (c.getBaseVolumes() != null && !c.getBaseVolumes().isEmpty()) {
-                List<BaseVolumeDto> bvDtoList = c.getBaseVolumes().stream()
-                        .map(Mapper::map)
-                        .toList();
-                cDto.setBaseVolumes(bvDtoList);
-            }
-
+            ContainerDto cDto = Mapper.deepMap(c);
             log.debug("Retrieved container DTO: {}", cDto);
 
             return cDto;
