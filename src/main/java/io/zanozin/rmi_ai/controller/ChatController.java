@@ -1,6 +1,6 @@
 package io.zanozin.rmi_ai.controller;
 
-import io.zanozin.rmi_ai.ContainerService;
+import io.zanozin.rmi_ai.service.ContainerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.GetMapping;

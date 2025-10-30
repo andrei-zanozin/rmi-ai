@@ -1,4 +1,4 @@
-package io.zanozin.rmi_ai;
+package io.zanozin.rmi_ai.service;
 
 import io.zanozin.rmi_ai.domain.entity.BaseVolume;
 import io.zanozin.rmi_ai.domain.entity.Container;
