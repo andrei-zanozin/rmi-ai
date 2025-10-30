@@ -1,5 +1,6 @@
 package io.zanozin.rmi_ai.controller;
 
+import io.zanozin.rmi_ai.service.BaseVolumeService;
 import io.zanozin.rmi_ai.service.ContainerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -30,12 +31,14 @@ public class ChatController {
 
     private final ContainerService containerService;
 
+    private final BaseVolumeService baseVolumeService;
+
     @GetMapping
     public String doChat(@RequestBody String prompt) {
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)
                 .user(prompt)
-                .tools(containerService)
+                .tools(containerService, baseVolumeService)
                 .call()
                 .content();
     }

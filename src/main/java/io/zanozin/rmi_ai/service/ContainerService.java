@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -29,34 +27,20 @@ public class ContainerService {
 
     private final ContainerRepository containerRepository;
 
-    @Tool(description = "Find container names by base volume parameters")
+    @Tool(description = "Find container names by base volume IDs")
     @Transactional
-    public Set<String> findContainerNamesByBaseVolumeParameters(
-            @ToolParam(description = "Value for base volume parameter `category`", required = false) String category,
-            @ToolParam(description = "Value for base volume parameter `supplier`", required = false) String supplier,
-            @ToolParam(description = "Value for base volume parameter `plant`", required = false) String plant,
-            @ToolParam(description = "Value for base volume parameter `part`", required = false) String part
+    public Set<String> findContainerNamesByBaseVolumeIds(
+            @ToolParam(description = "Base volume ID values", required = false) Set<Long> baseVolumeIds
     ) {
-        log.debug("Finding container names by base volume parameters: category={}, supplier={}, plant={}, part={}",
-                category, supplier, plant, part);
-        BaseVolume bv = BaseVolume.builder()
-                .category(category)
-                .supplier(supplier)
-                .plant(plant)
-                .part(part)
-                .build();
-        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
-                .withIgnoreCase()
-                .withIgnoreNullValues();
-        Example<BaseVolume> bvExample = Example.of(bv, exampleMatcher);
-        Set<String> containerNames = baseVolumeRepository.findAll(bvExample).stream()
+        log.debug("Finding container names by base volume IDs: {}", baseVolumeIds);
+        Set<String> cNames = baseVolumeRepository.findAllById(baseVolumeIds).stream()
                 .map(BaseVolume::getContainer)
                 .filter(Objects::nonNull)
                 .map(Container::getName)
                 .collect(Collectors.toSet());
-        log.debug("Found container names: {}", containerNames);
+        log.debug("Found container names by base volume IDs {}: {}", baseVolumeIds, cNames);
 
-        return containerNames;
+        return cNames;
     }
 
     @Tool(description = "Create a new empty container with the specified name")
